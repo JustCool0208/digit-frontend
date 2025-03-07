@@ -7,20 +7,44 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 ctx.strokeStyle = "white";
 ctx.lineWidth = 8;
 ctx.lineJoin = "round";
-let drawing = false;
-const apiUrl = "https://digit-backend-ax66.onrender.com"; 
 
-canvas.addEventListener("mousedown", () => drawing = true);
-canvas.addEventListener("mouseup", () => drawing = false);
+let drawing = false;
+
+canvas.addEventListener("mousedown", startDrawing);
+canvas.addEventListener("mouseup", stopDrawing);
 canvas.addEventListener("mousemove", draw);
+
+canvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    startDrawing(e.touches[0]);
+});
+canvas.addEventListener("touchend", stopDrawing);
+canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    draw(e.touches[0]);
+});
+
+function startDrawing(event) {
+    drawing = true;
+    ctx.beginPath();
+    ctx.moveTo(event.offsetX || event.clientX - canvas.offsetLeft, event.offsetY || event.clientY - canvas.offsetTop);
+}
+
+function stopDrawing() {
+    drawing = false;
+    ctx.beginPath();
+}
 
 function draw(event) {
     if (!drawing) return;
-    ctx.lineTo(event.offsetX, event.offsetY);
+    const x = event.offsetX || event.clientX - canvas.offsetLeft;
+    const y = event.offsetY || event.clientY - canvas.offsetTop;
+    ctx.lineTo(x, y);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(event.offsetX, event.offsetY);
+    ctx.moveTo(x, y);
 }
+
 
 function clearCanvas() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
