@@ -8,6 +8,7 @@ ctx.strokeStyle = "white";
 ctx.lineWidth = 8;
 ctx.lineJoin = "round";
 let drawing = false;
+const apiUrl = "https://digit-backend-ax66.onrender.com"; 
 
 canvas.addEventListener("mousedown", () => drawing = true);
 canvas.addEventListener("mouseup", () => drawing = false);
