@@ -10,9 +10,20 @@ ctx.lineJoin = "round";
 
 let drawing = false;
 
+
+document.body.addEventListener("touchstart", (e) => {
+    if (e.target === canvas) e.preventDefault();
+}, { passive: false });
+
+document.body.addEventListener("touchmove", (e) => {
+    if (e.target === canvas) e.preventDefault();
+}, { passive: false });
+
+
 canvas.addEventListener("mousedown", startDrawing);
 canvas.addEventListener("mouseup", stopDrawing);
 canvas.addEventListener("mousemove", draw);
+
 
 canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
@@ -23,20 +34,15 @@ canvas.addEventListener("touchmove", (e) => {
     e.preventDefault();
     draw(e.touches[0]);
 });
+
 function getCoordinates(event) {
-    let x, y;
-    if (event.clientX) {
-        
-        x = event.offsetX;
-        y = event.offsetY;
-    } else {
-        
-        const rect = canvas.getBoundingClientRect();
-        x = event.clientX - rect.left;
-        y = event.clientY - rect.top;
-    }
-    return { x, y };
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: (event.clientX - rect.left) * (canvas.width / rect.width),
+        y: (event.clientY - rect.top) * (canvas.height / rect.height),
+    };
 }
+
 function startDrawing(event) {
     drawing = true;
     const { x, y } = getCoordinates(event);
@@ -49,7 +55,6 @@ function stopDrawing() {
     ctx.beginPath();
 }
 
-
 function draw(event) {
     if (!drawing) return;
     const { x, y } = getCoordinates(event);
@@ -59,12 +64,19 @@ function draw(event) {
     ctx.moveTo(x, y);
 }
 
+
 function clearCanvas() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath(); 
+    ctx.beginPath();
 }
+
+
+const API_URL = "https://digit-backend-ax66.onrender.com/predict";
+
+
 fetch("https://digit-backend-ax66.onrender.com")
     .catch(() => console.log("Backend might take a few seconds to wake up."));
+
 
 async function sendData() {
     const operation = document.getElementById("operation").value;
@@ -72,20 +84,25 @@ async function sendData() {
     const imageBase64 = canvas.toDataURL();
 
     try {
-        const response = await fetch("https://digit-backend-ax66.onrender.com/predict", {
+        const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: imageBase64, operation: operation, second_number: parseInt(secondNumber) })
+            body: JSON.stringify({ 
+                image: imageBase64, 
+                operation: operation, 
+                second_number: parseInt(secondNumber) 
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
         const data = await response.json();
-        document.getElementById("result").innerText = `First digit : ${data.first_digit} , Second digit :  ${data.second_digit} , RESULT = ${data.result}`;
+        document.getElementById("result").innerText = 
+            `First digit: ${data.first_digit}, Second digit: ${data.second_digit}, RESULT = ${data.result}`;
     } catch (error) {
         console.error("Error:", error);
+        document.getElementById("result").innerText = "Error processing request.";
     }
 }
-
