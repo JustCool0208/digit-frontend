@@ -31,7 +31,7 @@ async function sendData() {
     const imageBase64 = canvas.toDataURL();
 
     try {
-        const response = await fetch("https://digit-backend-ax66.onrender.com", {
+        const response = await fetch("https://digit-backend-ax66.onrender.com/predict", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ image: imageBase64, operation: operation, second_number: parseInt(secondNumber) })
