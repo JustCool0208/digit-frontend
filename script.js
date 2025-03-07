@@ -23,11 +23,25 @@ canvas.addEventListener("touchmove", (e) => {
     e.preventDefault();
     draw(e.touches[0]);
 });
-
+function getCoordinates(event) {
+    let x, y;
+    if (event.clientX) {
+        
+        x = event.offsetX;
+        y = event.offsetY;
+    } else {
+        
+        const rect = canvas.getBoundingClientRect();
+        x = event.clientX - rect.left;
+        y = event.clientY - rect.top;
+    }
+    return { x, y };
+}
 function startDrawing(event) {
     drawing = true;
+    const { x, y } = getCoordinates(event);
     ctx.beginPath();
-    ctx.moveTo(event.offsetX || event.clientX - canvas.offsetLeft, event.offsetY || event.clientY - canvas.offsetTop);
+    ctx.moveTo(x, y);
 }
 
 function stopDrawing() {
@@ -35,20 +49,23 @@ function stopDrawing() {
     ctx.beginPath();
 }
 
+
 function draw(event) {
     if (!drawing) return;
-    const x = event.offsetX || event.clientX - canvas.offsetLeft;
-    const y = event.offsetY || event.clientY - canvas.offsetTop;
+    const { x, y } = getCoordinates(event);
     ctx.lineTo(x, y);
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x, y);
 }
 
-
 function clearCanvas() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.beginPath(); 
 }
+fetch("https://digit-backend-ax66.onrender.com")
+    .catch(() => console.log("Backend might take a few seconds to wake up."));
+
 async function sendData() {
     const operation = document.getElementById("operation").value;
     const secondNumber = document.getElementById("secondNumber").value;
